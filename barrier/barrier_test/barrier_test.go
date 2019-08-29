@@ -9,8 +9,8 @@ import (
 func TestBarrier(t *testing.T) {
 	t.Run("with_correct_endpoints", func(t *testing.T) {
 		endpoints := []string{
-			"http://test:8091/oauth/account",
-			"http://test:8091/kms",
+			"http://golang_test_server:8091/oauth/account",
+			"http://golang_test_server:8091/kms",
 		}
 		result, _ := barrier.NewBarrier().Barrier(endpoints...)
 
@@ -22,7 +22,7 @@ func TestBarrier(t *testing.T) {
 	t.Run("with_one_incorrect_endpoint", func(t *testing.T) {
 		endpoints := []string{
 			"http://malformed-url",
-			"http://test:8091/oauth/account",
+			"http://golang_test_server:8091/oauth/account",
 		}
 		_, err := barrier.NewBarrier().Barrier(endpoints...)
 
@@ -33,8 +33,8 @@ func TestBarrier(t *testing.T) {
 
 	t.Run("with_short_timeout", func(t *testing.T) {
 		endpoints := []string{
-			"http://test:8091/oauth/account",
-			"http://test:8091/kms",
+			"http://golang_test_server:8091/oauth/account",
+			"http://golang_test_server:8091/kms",
 		}
 		barrier.TimeoutMilliseconds = 1
 

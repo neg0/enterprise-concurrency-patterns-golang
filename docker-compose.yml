@@ -10,9 +10,9 @@ services:
     networks:
       - default_network_golang
 
-  test:
+  golang_test_server:
     image: golang:latest
-    container_name: concurrency-patterns-go-test
+    container_name: concurrency-patterns-go-test-server
     volumes:
       - "./test:/var/local/go-dev/concurrency-pattern-test"
     working_dir: "/var/local/go-dev/concurrency-pattern-test"
