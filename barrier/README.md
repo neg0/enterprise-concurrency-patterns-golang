@@ -5,6 +5,7 @@ only useful to make network requests; we could also use it to split some task in
 Goroutines. For example, an expensive operation could be split into a few smaller operations 
 distributed in different Goroutines to maximize parallelism and achieve better performance.
 
+## Uses Cases
 Imagine the situation where we have a microservices application where one service needs to 
 compose its response by merging the responses of another three microservices. This is where 
 the Barrier pattern can help us.
@@ -23,6 +24,7 @@ to finish. The Barrier pattern's objectives are as follows:
 * Control the correctness of any of those incoming data pipes so that no inconsistent data is returned. 
 We don't want a partially filled result because one of the pipes has returned an error.
 
+
 # Example
 For our example, we are going to write a very typical situation in a microservices 
 application; an app that performs two HTTP GET calls and joins them in a single response 
@@ -35,7 +37,9 @@ just the error.
 The design must be concurrent, allowing us to take advantage of our multi-core CPUs 
 to make the calls in parallel:
 
-//todo: Add a diagram
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/5575209/63971989-b530dd00-ca9f-11e9-980e-96dcd794955d.png">
+</p>
 
 In the preceding diagram, the solid lines represent calls and the dashed lines represent channels. 
 The balloons are Goroutines, so we have two Goroutines launched by the main function (which could 
