@@ -1,0 +1,15 @@
+version: "3"
+services:
+  golang:
+    image: golang:latest
+    container_name: concurrency-patterns-go
+    tty: true
+    volumes:
+      - "./:/var/local/go-dev/concurrency-pattern"
+    working_dir: "/var/local/go-dev/concurrency-pattern"
+    networks:
+      - default_network_golang
+
+networks:
+  default_network_golang:
+    driver: bridge

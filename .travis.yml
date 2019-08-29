@@ -1,0 +1,18 @@
+sudo: required
+
+os: linux
+
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - make up
+
+script:
+  - docker-compose exec golang go test ./...
+
+after_success:
+  - docker-compose -f docker-compose.yml stop
+  - docker-compose -f docker-compose.yml down -v --remove-orphans

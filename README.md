@@ -1,4 +1,5 @@
-# Enterprise Concurrency Patterns in Golang
+<h1 align="center">Enterprise Concurrency Patterns in Golang</h1>
+<p align="center"><img src="https://travis-ci.org/neg0/docfony.svg?branch=master" alt="build:passed"></p>
 Concurrency patterns mostly manage the timing execution and order execution of applications that has more 
 than one flow. Examples in this repository are done in TDD, integration tests are included under appended `_test` package.
 
