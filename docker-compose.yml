@@ -10,6 +10,18 @@ services:
     networks:
       - default_network_golang
 
+  test:
+    image: golang:latest
+    container_name: concurrency-patterns-go-test
+    volumes:
+      - "./test:/var/local/go-dev/concurrency-pattern-test"
+    working_dir: "/var/local/go-dev/concurrency-pattern-test"
+    ports:
+      - "8091:8091"
+    entrypoint: ["go", "run", "http_server.go"]
+    networks:
+      - default_network_golang
+
 networks:
   default_network_golang:
     driver: bridge
