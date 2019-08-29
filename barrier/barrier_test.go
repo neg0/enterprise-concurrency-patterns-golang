@@ -15,13 +15,13 @@ type httpClientMock struct {
 func (c *httpClientMock) Get(url string) (resp *http.Response, err error)  {
 	c.counter++
 	switch url {
-	case "https://jpmorganchase.com":
+	case "https://api.jpmorganchase.com/oauth/account":
 		return &http.Response{
-			Body: ioutil.NopCloser(strings.NewReader("Welcome to JP Morgan & Chase")),
+			Body: ioutil.NopCloser(strings.NewReader("Account authorisation key")),
 		}, nil
-	case "https://home.barclays":
+	case "https://api.google.com/cloudv1/kms":
 		return &http.Response{
-			Body: ioutil.NopCloser(strings.NewReader("Welcome to Barclays Home")),
+			Body: ioutil.NopCloser(strings.NewReader("Decrypted private key response result")),
 		}, nil
 	default:
 		panic("unexpected call received")
@@ -34,8 +34,8 @@ func TestBarrierWithSuccessfulResponses(t *testing.T) {
 
 	t.Run("when two requests completed successfully", func(t *testing.T) {
 		mockedEndpoints := []string{
-			"https://jpmorganchase.com",
-			"https://home.barclays",
+			"https://api.jpmorganchase.com/oauth/account",
+			"https://api.google.com/cloudv1/kms",
 		}
 
 		actual, err := sut.Barrier(mockedEndpoints...)
@@ -59,10 +59,11 @@ func (c *httpClientMockWithError) Get(url string) (resp *http.Response, err erro
 	c.counter++
 	if c.counter == 1 {
 		return &http.Response{
-			Body: ioutil.NopCloser(strings.NewReader("Welcome to JP Morgan & Chase")),
+			Body: ioutil.NopCloser(strings.NewReader("Account Authorisation for JP Morgan & Chase")),
 		}, nil
 	}
-	return  nil, errors.New("error establishing http connection")
+
+	return  nil, errors.New("error establishing http connection with Google KMS API")
 }
 
 func TestBarrierWithErrorResponses(t *testing.T) {
@@ -71,8 +72,8 @@ func TestBarrierWithErrorResponses(t *testing.T) {
 
 	t.Run("when second request fails", func(t *testing.T) {
 		mockedEndpoints := []string{
-			"https://jpmorganchase.com",
-			"https://home.barclays",
+			"https://api.jpmorganchase.com/oauth/account",
+			"https://api.google.com/cloudv1/kms",
 		}
 
 		actual, err := sut.Barrier(mockedEndpoints...)

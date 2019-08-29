@@ -9,8 +9,8 @@ import (
 func TestBarrier(t *testing.T) {
 	t.Run("with_correct_endpoints", func(t *testing.T) {
 		endpoints := []string{
-			"http://httpbin.org/user-agent",
-			"http://httpbin.org/headers",
+			"https://jsonplaceholder.typicode.com/users/1",
+			"https://jsonplaceholder.typicode.com/posts/1",
 		}
 		result, _ := barrier.NewBarrier().Barrier(endpoints...)
 
@@ -22,7 +22,7 @@ func TestBarrier(t *testing.T) {
 	t.Run("with_one_incorrect_endpoint", func(t *testing.T) {
 		endpoints := []string{
 			"http://malformed-url",
-			"http://httpbin.org/user-agent",
+			"https://jsonplaceholder.typicode.com/users/1",
 		}
 		_, err := barrier.NewBarrier().Barrier(endpoints...)
 
@@ -33,8 +33,8 @@ func TestBarrier(t *testing.T) {
 
 	t.Run("with_short_timeout", func(t *testing.T) {
 		endpoints := []string{
-			"http://httpbin.org/headers",
-			"http://httpbin.org/user-agent",
+			"https://jsonplaceholder.typicode.com/users/1",
+			"https://jsonplaceholder.typicode.com/posts/1",
 		}
 		barrier.TimeoutMilliseconds = 1
 
