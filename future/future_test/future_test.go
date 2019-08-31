@@ -11,21 +11,21 @@ func TestFuture(t *testing.T) {
 	sut := &Future.Promise{}
 
 	t.Run("when_closure_used_as_parameter_with_Success", func(t *testing.T) {
-		sut.Success(func(s string) {
+		sut.Then(func(s string) {
 			t.Log(s)
-		}).Fail(func(e error) {
+		}).Catch(func(e error) {
 			t.Log(e.Error())
 			t.Fail()
-		}).Execute(setContext("http://127.0.0.1:8091"))
+		}).Future(setContext("http://127.0.0.1:8091"))
 	})
 
 	t.Run("when_closure_used_as_parameter_with_Error", func(t *testing.T) {
-		sut.Success(func(s string) {
+		sut.Then(func(s string) {
 			t.Log(s)
 			t.Fail()
-		}).Fail(func(e error) {
+		}).Catch(func(e error) {
 			t.Log(e.Error())
-		}).Execute(setContext("http://127.0.0.1:9999"))
+		}).Future(setContext("http://127.0.0.1:9999"))
 	})
 }
 

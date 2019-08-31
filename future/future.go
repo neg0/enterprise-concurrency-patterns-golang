@@ -2,42 +2,38 @@ package future
 
 import "sync"
 
-type successful func(string)
-type failure func(error)
+type resolve func(string)
+type reject func(error)
 type execution func() (string, error)
 
 type Promise struct {
 	sync.WaitGroup
-	successful
-	failure
+	resolve
+	reject
 }
 
-func (p *Promise) Success(f successful) *Promise {
-	p.successful = f
+func (p *Promise) Then(f resolve) *Promise {
+	p.resolve = f
 
 	return p
 }
 
-func (p *Promise) Fail(f failure) *Promise {
-	p.failure = f
+func (p *Promise) Catch(f reject) *Promise {
+	p.reject = f
 
 	return p
 }
 
-func (p *Promise) Execute(f execution) {
+func (p *Promise) Future(f execution) {
 	p.Add(1)
 	go func(p *Promise) {
 		str, err := f()
 		if err != nil {
-			p.failure(err)
+			p.reject(err)
 		} else {
-			p.successful(str)
+			p.resolve(str)
 		}
 		p.Done()
 	}(p)
-	p.Wait()
-}
-
-func (p *Promise) Finally() {
 	p.Wait()
 }
