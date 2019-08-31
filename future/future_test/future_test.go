@@ -16,7 +16,7 @@ func TestFuture(t *testing.T) {
 		}).Catch(func(e error) {
 			t.Log(e.Error())
 			t.Fail()
-		}).Future(setContext("http://127.0.0.1:8091"))
+		}).Future(setContext("http://golang_test_server:8091"))
 	})
 
 	t.Run("when_closure_used_as_parameter_with_Error", func(t *testing.T) {
@@ -25,7 +25,7 @@ func TestFuture(t *testing.T) {
 			t.Fail()
 		}).Catch(func(e error) {
 			t.Log(e.Error())
-		}).Future(setContext("http://127.0.0.1:9999"))
+		}).Future(setContext("http://golang_test_server:9999"))
 	})
 }
 
