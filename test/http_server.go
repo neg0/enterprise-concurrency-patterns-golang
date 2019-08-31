@@ -9,7 +9,7 @@ import (
 func main() {
 	http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
 		time.Sleep(time.Millisecond * 5)
-		_, _ = fmt.Fprintf(w, "Healthy Test endpoint")
+		_, _ = fmt.Fprintf(w, "Golang Concurrency Ninja!")
 	})
 	http.HandleFunc("/oauth/account", func (w http.ResponseWriter, r *http.Request) {
 		time.Sleep(time.Millisecond * 5)
