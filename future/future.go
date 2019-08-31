@@ -7,9 +7,9 @@ type reject func(error)
 type execution func() (string, error)
 
 type Promise struct {
-	sync.WaitGroup
 	resolve
 	reject
+	sync.WaitGroup
 }
 
 func (p *Promise) Then(f resolve) *Promise {
@@ -24,7 +24,11 @@ func (p *Promise) Catch(f reject) *Promise {
 	return p
 }
 
-func (p *Promise) Future(f execution) {
+func (p *Promise) Execute() {
+	p.Wait()
+}
+
+func (p *Promise) Future(f execution) *Promise {
 	p.Add(1)
 	go func(p *Promise) {
 		str, err := f()
@@ -35,5 +39,6 @@ func (p *Promise) Future(f execution) {
 		}
 		p.Done()
 	}(p)
-	p.Wait()
+
+	return p
 }

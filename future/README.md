@@ -1,5 +1,4 @@
 # Future (Promise) Concurrency Pattern
-
 The Future design pattern (also called Promise) is a quick and easy way to achieve concurrent 
 structures for asynchronous programming. We will take advantage of first class functions in Go 
 to develop Futures.
@@ -32,6 +31,7 @@ This is a kind of lazy programming, where a Future could be calling to itself in
 some rule is satisfied. The idea is to define the behavior in advance and let the future resolve the 
 possible solutions.
 
+
 # Example
 We are going to develop a very simple example to try to understand how a Future works. In this example, 
 we will have a method that returns a string or an error, but we want to execute it concurrently. 
@@ -44,6 +44,7 @@ we will define what to do in case of success and what to do in case of error and
 We could also have done asynchronous programming without functions by setting an interface with Success, Fail, 
 and Execute methods and the types that satisfy them, and using the Template pattern to execute them asynchronously
 
+
 ## Acceptance criteria
 We don't have functional requirements for this task. Instead, we will have technical requirements for it:
 
@@ -51,3 +52,19 @@ We don't have functional requirements for this task. Instead, we will have techn
 * The function will return a string (maybe) or an error
 * The handlers must be already defined before executing the function
 * The design must be reusable
+
+
+## Tests
+There are two sets of tests for this pattern:
+* Integration tests are included under `future_test` package to emulate import and creating real HTTP GET Calls
+* Unit tests are included under `future` package as per classic Golang convention
+
+In order to run the tests individually, please go inside `future` or `future_test` directory and run the following:
+
+    ~$: go test -run=<NameOfTestMethod> -v .
+    ~$: go test -run=TestFuture -v .
+
+if you wish to run the tests individually, please use following command:
+    
+    ~$: go test -run=TestFuture/<test_description> -v .
+    ~$: go test -run=TestFuture/when_result_is_successful -v .

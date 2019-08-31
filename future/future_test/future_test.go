@@ -10,22 +10,36 @@ import (
 func TestFuture(t *testing.T) {
 	sut := &Future.Promise{}
 
-	t.Run("when_closure_used_as_parameter_with_Success", func(t *testing.T) {
-		sut.Then(func(s string) {
-			t.Log(s)
-		}).Catch(func(e error) {
-			t.Log(e.Error())
-			t.Fail()
-		}).Future(setContext("http://golang_test_server:8091"))
+	t.Run("when_closure_used_as_parameter_with_success", func(t *testing.T) {
+		sut.
+			Future(setContext("http://golang_test_server:8091")).
+			Catch(func(e error) {
+				t.Log(e.Error())
+				t.Fail()
+			}).
+			Then(func(s string) {
+				if len(s) < 1 {
+					t.Fail()
+				}
+			}).
+			Execute()
 	})
 
-	t.Run("when_closure_used_as_parameter_with_Error", func(t *testing.T) {
-		sut.Then(func(s string) {
-			t.Log(s)
-			t.Fail()
-		}).Catch(func(e error) {
-			t.Log(e.Error())
-		}).Future(setContext("http://golang_test_server:9999"))
+	t.Run("when_closure_used_as_parameter_with_error", func(t *testing.T) {
+		sut.
+			Future(setContext("http://golang_test_server:666")).
+			Catch(func(e error) {
+				if e == nil {
+					t.Fail()
+				}
+			}).
+			Then(func(s string) {
+				if len(s) > 0 {
+					t.Log(s)
+					t.Fail()
+				}
+			}).
+			Execute()
 	})
 }
 
