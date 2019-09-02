@@ -1,5 +1,8 @@
 <h1 align="center">Trinity Concurrency Patterns in Golang</h1>
 <p align="center"><img src="https://travis-ci.org/neg0/enterprise-concurrency-patterns-golang.svg?branch=master"></p>
+
+[![Coverage Status](https://coveralls.io/repos/github/neg0/enterprise-concurrency-patterns-golang/badge.svg?branch=master)](https://coveralls.io/github/neg0/enterprise-concurrency-patterns-golang?branch=master)
+
 <p>Concurrency patterns mostly manage the timing execution and order execution of applications that has more 
 than one flow. Examples in this repository are done in TDD, integration tests are included under appended `_test` package.</p>
 

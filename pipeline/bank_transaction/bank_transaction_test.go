@@ -8,7 +8,7 @@ import (
 
 func TestCreationOfBankTransactionFromJSONByte(t *testing.T) {
 	var sut Transaction
-	err := json.Unmarshal([]byte(testCase), &sut)
+	err := json.Unmarshal([]byte(transactionWithCorrectAmount), &sut)
 
 	t.Run("should_successfully_create_transaction_from_json_string", func(t *testing.T) {
 		if err != nil {
@@ -58,11 +58,41 @@ func TestCreationOfBankTransactionFromJSONByte(t *testing.T) {
 	})
 }
 
-const testCase = `{
+func TestCreationOfBankTransactionFromJSONByteWhenAmountIsInvalid(t *testing.T) {
+	var sut Transaction
+	err := json.Unmarshal([]byte(transactionWithIncorrectAmount), &sut)
+
+	t.Run("should_successfully_create_transaction_from_json_string", func(t *testing.T) {
+		if err != nil {
+			t.Log(err.Error())
+			t.Fail()
+		}
+	})
+
+	t.Run("should_have_amount_of_zero_due_to_invalid_float_string_in_json", func(t *testing.T) {
+		actual, _ := sut.Amount.Value()
+		if actual != 0 {
+			t.Log(actual)
+			t.Fail()
+		}
+	})
+}
+
+const transactionWithCorrectAmount = `{
 					"AccountId": "3234672871",
 					"TransactionId": "1b20d4cc-29a5-4c51-a8f3-f8b08a1a7661",
 					"Amount": {
 					  "Amount": "11.9923",
+					  "Currency": "GBP"
+					},
+					"TransactionInformation": "Netflix Subscription Intl."
+				  }`
+
+const transactionWithIncorrectAmount = `{
+					"AccountId": "3234672871",
+					"TransactionId": "1b20d4cc-29a5-4c51-a8f3-f8b08a1a7661",
+					"Amount": {
+					  "Amount": "^*^",
 					  "Currency": "GBP"
 					},
 					"TransactionInformation": "Netflix Subscription Intl."

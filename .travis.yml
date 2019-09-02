@@ -11,7 +11,9 @@ before_install:
   - make up
 
 script:
-  - docker-compose exec golang go test -cover ./...
+  - docker-compose exec golang go test ./... -v -covermode=count -coverprofile=coverage.out
+  - docker-compose exec golang go get github.com/mattn/goveralls
+  - docker-compose exec golang /go/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 after_success:
   - docker-compose -f docker-compose.yml stop
