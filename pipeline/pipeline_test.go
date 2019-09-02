@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -41,7 +42,7 @@ func (client *httpClientMock) Post(url, contentType string, body io.Reader) (res
 	}, nil
 }
 
-func TestPipeline(t *testing.T) {
+func _TestPipeline(t *testing.T) {
 	testCases, err := ioutil.ReadFile("./pipeline_test/mock.json")
 	if err != nil {
 		t.Log(err.Error())
@@ -96,5 +97,146 @@ func TestPipeline(t *testing.T) {
 			t.Log(mockedHttpClient.merchantCounter)
 			t.Fail()
 		}
+	})
+}
+
+
+type httpClientErrorMock struct {
+	merchantCounter int
+	categoryCounter int
+}
+
+func (client *httpClientErrorMock) Post(url, contentType string, body io.Reader) (resp *http.Response, err error)  {
+	if url == "http://golang_test_server:8091/enrich/merchant" {
+		client.merchantCounter++
+		randMerchants := []string{
+			"Netflix",
+			"Mark & Spencer",
+			"Amazon",
+		}
+
+		switch client.merchantCounter {
+			case 1:
+				return &http.Response{
+					Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
+					StatusCode: http.StatusNotFound,
+					Status: http.StatusText(http.StatusNotFound),
+				},
+					errors.New(fmt.Sprintf("made up error call number: %d", 1))
+			case 2:
+				return &http.Response{
+					Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
+					StatusCode: http.StatusNotFound,
+					Status: http.StatusText(http.StatusNotFound),
+				},
+				errors.New(fmt.Sprintf("made up error call number: %d", 2))
+			default:
+				return &http.Response{
+					Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
+				}, nil
+		}
+	}
+
+	client.categoryCounter++
+	randCats := []string{
+		"Entertainment",
+		"Leisure",
+		"Shopping",
+	}
+
+	switch client.categoryCounter {
+		case 1:
+			return &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
+				StatusCode: http.StatusNotFound,
+			},
+				errors.New(fmt.Sprintf("made up error call number: %d", 1))
+		case 2:
+			return &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
+				StatusCode: http.StatusNotFound,
+			},
+				errors.New(fmt.Sprintf("made up error call number: %d", 2))
+		default:
+			return &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
+			}, nil
+	}
+}
+
+
+func TestPipelineFailureCases(t *testing.T) {
+	sut := &Pipeline{}
+	mockedHttpClient := &httpClientErrorMock{0, 0}
+	sut.HttpClient = mockedHttpClient
+
+	t.Run("should_return_an_error_when_single_transaction_is_passed_in", func(t *testing.T) {
+		testCase := `{
+					  "AccountId": "3234672871",
+					  "TransactionId": "3ed19f1c-096b-412d-b27b-9bc2b757a572",
+					  "Amount": {
+						"Amount": "48.95",
+						"Currency": "GBP"
+					  },
+					  "TransactionInformation": "Tesco SuperStore Kensington London"
+					}`
+
+		actual, err := sut.Enrich([]byte(testCase))
+
+		if len(actual) > 0 {
+			t.Fail()
+		}
+
+		if err == nil {
+			t.Log(err)
+		}
+	})
+
+	t.Run("should_return_an_error_when_one_of_fields_is_incorrect_type", func(t *testing.T) {
+		testCase := `[{
+					  "AccountId": "3234672871",
+					  "TransactionId": "3ed19f1c-096b-412d-b27b-9bc2b757a572",
+					  "Amount": {
+						"Amount": 48.95,
+						"Currency": "GBP"
+					  },
+					  "TransactionInformation": "Tesco SuperStore Kensington London"
+					}]`
+
+		actual, err := sut.Enrich([]byte(testCase))
+
+		if len(actual) > 0 {
+			t.Fail()
+		}
+
+		if err == nil {
+			t.Fail()
+			t.Log(err)
+		}
+		t.Log(err)
+	})
+
+	t.Run("should_return_an_error_identifying_merchant", func(t *testing.T) {
+		testCase := `[{
+					  "AccountId": "3234672871",
+					  "TransactionId": "3ed19f1c-096b-412d-b27b-9bc2b757a572",
+					  "Amount": {
+						"Amount": "48.95",
+						"Currency": "GBP"
+					  },
+					  "TransactionInformation": "Tesco SuperStore Kensington London"
+					}]`
+
+		actual, err := sut.Enrich([]byte(testCase))
+
+		if len(actual) > 0 {
+			t.Fail()
+		}
+
+		if err == nil {
+			t.Fail()
+			t.Log(err)
+		}
+		t.Log(err)
 	})
 }

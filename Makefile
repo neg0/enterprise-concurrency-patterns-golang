@@ -14,3 +14,7 @@ down:
 .PHONY: go      # Enters the Golang Container
 go:
 	docker-compose -f docker-compose.yml exec golang bash
+
+.PHONY: test      # Runs the tests inside the golang container
+test:
+	docker-compose exec golang go test ./... -v
