@@ -70,13 +70,11 @@ func (p *Pipeline) generatePipelines(transactions []Bank.Transaction) <-chan Ban
 }
 
 func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
-	p.Add(1)
-
 	out := make(chan Bank.Transaction, len(in))
 	errCh := make(chan error, 1)
 	var err error
 
-	go func(hasError error, w *sync.WaitGroup) {
+	go func(hasError error) {
 		for v := range in {
 			payload, _ := json.Marshal(v.TransactionID)
 			resp, err := p.HttpClient.Post(
@@ -96,9 +94,7 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		}
 		close(out)
 		err = <-errCh
-		defer w.Done()
-	}(err, &p.WaitGroup)
-	p.Wait()
+	}(err)
 
 	return out, err
 }
