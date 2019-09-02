@@ -29,6 +29,32 @@ func TestCreationOfBankTransactionFromJSONByte(t *testing.T) {
 			t.Log(actual)
 			t.Fail()
 		}
+
+		if len(sut.Amount.Currency) < 1 {
+			t.Log(sut.Amount.Currency)
+			t.Fail()
+		}
+	})
+
+	t.Run("should_have_AccountId", func(t *testing.T) {
+		if len(sut.AccountID) < 1 {
+			t.Log(sut.AccountID)
+			t.Fail()
+		}
+	})
+
+	t.Run("should_have_TransactionId", func(t *testing.T) {
+		if len(sut.TransactionID) < 1 {
+			t.Log(sut.TransactionID)
+			t.Fail()
+		}
+	})
+
+	t.Run("should_have_TransactionInformation", func(t *testing.T) {
+		if len(sut.TransactionInformation) < 1 {
+			t.Log(sut.TransactionInformation)
+			t.Fail()
+		}
 	})
 }
 

@@ -6,7 +6,8 @@ get looped in their out execution.
 
 The Pipeline pattern in Go works in a similar fashion, but each step in the Pipeline 
 will be in a different Goroutine and communication, and synchronizing will be done 
-using channels.
+using channels. You could consider this pattern a collection of barriers; but each 
+barrier is queued after each other and each barrier depends on previous barrier 
 
 
 ## Objectives

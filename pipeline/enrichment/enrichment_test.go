@@ -12,7 +12,7 @@ func TestCreatingEnrichment(t *testing.T) {
 	}
 
 	t.Run("should_be_enrichment_struct_type", func(t *testing.T) {
-		if reflect.TypeOf(sut).String() != "*enrichment.Enrichment" {
+		if reflect.TypeOf(*sut).String() != "enrichment.Enrichment" {
 			t.Log(reflect.TypeOf(sut).String())
 			t.Fail()
 		}
