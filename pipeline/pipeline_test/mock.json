@@ -1,0 +1,29 @@
+[
+  {
+    "AccountId": "3234672871",
+    "TransactionId": "3ed19f1c-096b-412d-b27b-9bc2b757a572",
+    "Amount": {
+      "Amount": "48.95",
+      "Currency": "GBP"
+    },
+    "TransactionInformation": "Tesco SuperStore Kensington London"
+  },
+  {
+    "AccountId": "3234672871",
+    "TransactionId": "1b20d4cc-29a5-4c51-a8f3-f8b08a1a7661",
+    "Amount": {
+      "Amount": "11.99",
+      "Currency": "GBP"
+    },
+    "TransactionInformation": "Netflix Subscription Intl."
+  },
+  {
+    "AccountId": "3234672871",
+    "TransactionId": "713636f9-4e4c-4d31-a56d-213c6b25f13f",
+    "Amount": {
+      "Amount": "98.29",
+      "Currency": "GBP"
+    },
+    "TransactionInformation": "Amazon Int EU"
+  }
+]
