@@ -14,7 +14,7 @@ services:
     image: golang:latest
     container_name: concurrency-patterns-go-test-server
     volumes:
-      - "./test:/var/local/go-dev/concurrency-pattern-test"
+      - "./test_server:/var/local/go-dev/concurrency-pattern-test"
     working_dir: "/var/local/go-dev/concurrency-pattern-test"
     ports:
       - "8091:8091"

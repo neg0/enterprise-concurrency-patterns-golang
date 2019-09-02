@@ -42,7 +42,7 @@ func (client *httpClientMock) Post(url, contentType string, body io.Reader) (res
 	}, nil
 }
 
-func _TestPipeline(t *testing.T) {
+func TestPipeline(t *testing.T) {
 	testCases, err := ioutil.ReadFile("./pipeline_test/mock.json")
 	if err != nil {
 		t.Log(err.Error())

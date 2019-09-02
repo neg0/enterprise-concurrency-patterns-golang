@@ -85,7 +85,7 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 			if err != nil {
 				errCh<- err
 				close(errCh)
-				continue
+				break
 			}
 			bodyResp, _ := ioutil.ReadAll(resp.Body)
 
