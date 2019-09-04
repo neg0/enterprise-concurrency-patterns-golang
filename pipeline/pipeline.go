@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"sync"
+	"time"
 )
 
 type Pipeline struct {
@@ -44,7 +45,7 @@ func (p *Pipeline) process(transactions []byte) ([]Bank.Transaction, error) {
 	errCh := make(chan error, 1)
 	go func(trx []byte) {
 		err := json.Unmarshal(transactions, &parsedTrx)
-		errCh<- err
+		errCh <- err
 		close(errCh)
 	}(transactions)
 
@@ -83,8 +84,7 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 				bytes.NewBuffer(payload),
 			)
 			if err != nil {
-				errCh<- err
-				close(errCh)
+				errCh <- err
 				break
 			}
 			bodyResp, _ := ioutil.ReadAll(resp.Body)
@@ -94,30 +94,50 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		}
 		close(out)
 		err = <-errCh
+		close(errCh)
 	}(err)
+	time.Sleep(time.Millisecond * 1)
 
 	return out, err
 }
 
 func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
 	out := make(chan Bank.Transaction, len(in))
+	errOut := make(chan error, 1)
+	var err error
 
-	go func() {
+	go func(hasError error) {
 		for v := range in {
-			payload, _ := json.Marshal(v.TransactionID)
+			payload, err := json.Marshal(v.TransactionID)
+			if err != nil {
+				errOut <- err
+				break
+			}
 
-			resp, _ := p.HttpClient.Post(
+			resp, err := p.HttpClient.Post(
 				"http://golang_test_server:8091/enrich/category",
 				"text/plain",
 				bytes.NewBuffer(payload),
 			)
-			bodyResp, _ := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				errOut <- err
+				break
+			}
+
+			bodyResp, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				errOut <- err
+				break
+			}
 
 			v.Enrichment.Category = string(bodyResp)
 			out <- v
 		}
 		close(out)
-	}()
+		err = <-errOut
+		close(errOut)
+	}(err)
+	time.Sleep(time.Millisecond * 1)
 
-	return out, nil
+	return out, err
 }

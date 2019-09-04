@@ -14,12 +14,12 @@ func TestFuture(t *testing.T) {
 			Future(func() (string, error) {
 				return "Golang Concurrency Ninja!", nil
 			}).Then(func(s string) {
-				if !strings.Contains(s, "Golang Concurrency Ninja!") {
-					t.Fail()
-				}
-			}).Catch(func(e error) {
+			if !strings.Contains(s, "Golang Concurrency Ninja!") {
 				t.Fail()
-			}).
+			}
+		}).Catch(func(e error) {
+			t.Fail()
+		}).
 			Execute()
 	})
 
@@ -29,12 +29,12 @@ func TestFuture(t *testing.T) {
 			Future(func() (string, error) {
 				return "", errors.New("error occurred")
 			}).Then(func(s string) {
-				successCallsCounter++
-			}).Catch(func(e error) {
-				if strings.Compare(e.Error(), "error occurred") == -1 {
-					t.Fail()
-				}
-			}).Execute()
+			successCallsCounter++
+		}).Catch(func(e error) {
+			if strings.Compare(e.Error(), "error occurred") == -1 {
+				t.Fail()
+			}
+		}).Execute()
 
 		if successCallsCounter > 0 {
 			t.Fail()

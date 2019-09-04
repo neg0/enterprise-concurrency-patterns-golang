@@ -12,7 +12,7 @@ type httpClientMock struct {
 	counter int8
 }
 
-func (c *httpClientMock) Get(url string) (resp *http.Response, err error)  {
+func (c *httpClientMock) Get(url string) (resp *http.Response, err error) {
 	c.counter++
 	switch url {
 	case "https://api.jpmorganchase.com/oauth/account":
@@ -55,7 +55,7 @@ type httpClientMockWithError struct {
 	counter int8
 }
 
-func (c *httpClientMockWithError) Get(url string) (resp *http.Response, err error)  {
+func (c *httpClientMockWithError) Get(url string) (resp *http.Response, err error) {
 	c.counter++
 	if c.counter == 1 {
 		return &http.Response{
@@ -63,7 +63,7 @@ func (c *httpClientMockWithError) Get(url string) (resp *http.Response, err erro
 		}, nil
 	}
 
-	return  nil, errors.New("error establishing http connection with Google KMS API")
+	return nil, errors.New("error establishing http connection with Google KMS API")
 }
 
 func TestBarrierWithErrorResponses(t *testing.T) {

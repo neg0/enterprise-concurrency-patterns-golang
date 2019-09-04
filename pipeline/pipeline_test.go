@@ -16,7 +16,7 @@ type httpClientMock struct {
 	categoryCounter int
 }
 
-func (client *httpClientMock) Post(url, contentType string, body io.Reader) (resp *http.Response, err error)  {
+func (client *httpClientMock) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
 	if url == "http://golang_test_server:8091/enrich/merchant" {
 		client.merchantCounter++
 		randMerchants := []string{
@@ -100,13 +100,12 @@ func TestPipeline(t *testing.T) {
 	})
 }
 
-
 type httpClientErrorMock struct {
 	merchantCounter int
 	categoryCounter int
 }
 
-func (client *httpClientErrorMock) Post(url, contentType string, body io.Reader) (resp *http.Response, err error)  {
+func (client *httpClientErrorMock) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
 	if url == "http://golang_test_server:8091/enrich/merchant" {
 		client.merchantCounter++
 		randMerchants := []string{
@@ -116,24 +115,24 @@ func (client *httpClientErrorMock) Post(url, contentType string, body io.Reader)
 		}
 
 		switch client.merchantCounter {
-			case 1:
-				return &http.Response{
-					Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
+		case 1:
+			return &http.Response{
+					Body:       ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
 					StatusCode: http.StatusNotFound,
-					Status: http.StatusText(http.StatusNotFound),
+					Status:     http.StatusText(http.StatusNotFound),
 				},
-					errors.New(fmt.Sprintf("made up error call number: %d", 1))
-			case 2:
-				return &http.Response{
-					Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
+				errors.New(fmt.Sprintf("made up error call number: %d", 1))
+		case 2:
+			return &http.Response{
+					Body:       ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
 					StatusCode: http.StatusNotFound,
-					Status: http.StatusText(http.StatusNotFound),
+					Status:     http.StatusText(http.StatusNotFound),
 				},
 				errors.New(fmt.Sprintf("made up error call number: %d", 2))
-			default:
-				return &http.Response{
-					Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
-				}, nil
+		default:
+			return &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(randMerchants[rand.Intn(len(randMerchants))])),
+			}, nil
 		}
 	}
 
@@ -145,25 +144,24 @@ func (client *httpClientErrorMock) Post(url, contentType string, body io.Reader)
 	}
 
 	switch client.categoryCounter {
-		case 1:
-			return &http.Response{
-				Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
+	case 1:
+		return &http.Response{
+				Body:       ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
 				StatusCode: http.StatusNotFound,
 			},
-				errors.New(fmt.Sprintf("made up error call number: %d", 1))
-		case 2:
-			return &http.Response{
-				Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
+			errors.New(fmt.Sprintf("made up error call number: %d", 1))
+	case 2:
+		return &http.Response{
+				Body:       ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
 				StatusCode: http.StatusNotFound,
 			},
-				errors.New(fmt.Sprintf("made up error call number: %d", 2))
-		default:
-			return &http.Response{
-				Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
-			}, nil
+			errors.New(fmt.Sprintf("made up error call number: %d", 2))
+	default:
+		return &http.Response{
+			Body: ioutil.NopCloser(strings.NewReader(randCats[rand.Intn(len(randCats))])),
+		}, nil
 	}
 }
-
 
 func TestPipelineFailureCases(t *testing.T) {
 	sut := &Pipeline{}

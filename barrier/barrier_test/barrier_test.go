@@ -48,4 +48,3 @@ func TestBarrier(t *testing.T) {
 		}
 	})
 }
-

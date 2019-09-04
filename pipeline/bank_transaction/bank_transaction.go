@@ -11,16 +11,16 @@ type ValueObjectFloat interface {
 }
 
 type Transaction struct {
-	AccountID				string 					`json:"AccountId"`
-	TransactionID			string 					`json:"TransactionId"`
-	Amount					Amount 					`json:"Amount"`
-	TransactionInformation	string 					`json:"TransactionInformation"`
-	Enrichment				enrichment.Enrichment 	`json:"-"`
+	AccountID              string                `json:"AccountId"`
+	TransactionID          string                `json:"TransactionId"`
+	Amount                 Amount                `json:"Amount"`
+	TransactionInformation string                `json:"TransactionInformation"`
+	Enrichment             enrichment.Enrichment `json:"-"`
 }
 
 type Amount struct {
-	Amount 		string 	`json:"amount"`
-	Currency 	string 	`json:"currency"`
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
 }
 
 func (a Amount) Value() (float64, error) {
