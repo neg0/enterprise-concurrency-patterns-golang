@@ -71,8 +71,10 @@ func (p *Pipeline) generatePipelines(transactions []Bank.Transaction) <-chan Ban
 }
 
 func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
-	out := make(chan Bank.Transaction, len(in))
-	errCh := make(chan error, 1)
+	numOfWorkers := positiveLength(len(in))
+
+	out := make(chan Bank.Transaction, numOfWorkers)
+	errCh := make(chan error, numOfWorkers)
 	done := make(chan bool)
 	var err error
 
@@ -89,7 +91,12 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 				errCh <- err
 				continue
 			}
-			bodyResp, _ := ioutil.ReadAll(resp.Body)
+
+			bodyResp, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				errCh <- err
+				continue
+			}
 
 			v.Enrichment.Merchant = string(bodyResp)
 			out <- v
@@ -109,8 +116,11 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 }
 
 func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
-	out := make(chan Bank.Transaction, len(in))
-	errOut := make(chan error, 1)
+	numOfWorkers := positiveLength(len(in))
+
+	out := make(chan Bank.Transaction, numOfWorkers)
+	errOut := make(chan error, numOfWorkers)
+	done := make(chan bool)
 	var err error
 
 	go func(hasError error) {
@@ -143,8 +153,22 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		close(out)
 		err = <-errOut
 		close(errOut)
+		done<- true
 	}(err)
 	time.Sleep(time.Millisecond * 1)
 
-	return out, err
+	select {
+		case <-done:
+			return out, err
+		case <-time.After(time.Millisecond * 1):
+			return out, err
+	}
+}
+
+func positiveLength(numOfWorkers int) int {
+	if numOfWorkers == 0 {
+		numOfWorkers = 1
+	}
+
+	return numOfWorkers
 }
