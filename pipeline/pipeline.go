@@ -76,7 +76,7 @@ func (p *Pipeline) process(transactions []byte) ([]Bank.Transaction, error) {
 }
 
 func (p *Pipeline) generatePipelines(transactions []Bank.Transaction) <-chan Bank.Transaction {
-	outChString := make(chan Bank.Transaction, len(transactions))
+	outChString := make(chan Bank.Transaction)
 
 	go func() {
 		for _, trx := range transactions {
@@ -89,10 +89,8 @@ func (p *Pipeline) generatePipelines(transactions []Bank.Transaction) <-chan Ban
 }
 
 func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
-	numOfWorkers := positiveLength(len(in))
-
-	out := make(chan Bank.Transaction, numOfWorkers)
-	errCh := make(chan error, numOfWorkers)
+	out := make(chan Bank.Transaction)
+	errCh := make(chan error)
 	done := make(chan bool)
 	var err error
 
@@ -126,10 +124,15 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 	}(err)
 
 	select {
-	case <-done:
-		return out, err
-	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
-		return out, err
+		case <-done:
+			return out, err
+		case err := <-errCh:
+			if err != nil {
+				return out, err
+			}
+			return out, nil
+		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+			return out, err
 	}
 }
 
@@ -173,13 +176,12 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		close(errOut)
 		done <- true
 	}(err)
-	time.Sleep(time.Millisecond * 1)
 
 	select {
-	case <-done:
-		return out, err
-	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
-		return out, err
+		case <-done:
+			return out, err
+		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+			return out, err
 	}
 }
 
