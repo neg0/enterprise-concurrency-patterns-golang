@@ -11,7 +11,6 @@ import (
 )
 
 type Pipeline struct {
-	sync.WaitGroup
 	HttpClient
 }
 
@@ -92,10 +91,8 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 	out := make(chan Bank.Transaction)
 	errCh := make(chan error)
 	done := make(chan bool)
-	var err error
 
-	p.Add(1)
-	go func(hasError error) {
+	go func() {
 		for v := range in {
 			payload, _ := json.Marshal(v.TransactionID)
 			resp, err := p.HttpClient.Post(
@@ -108,31 +105,22 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 				continue
 			}
 
-			bodyResp, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				errCh <- err
-				continue
-			}
-
+			bodyResp, _ := ioutil.ReadAll(resp.Body)
 			v.Enrichment.Merchant = string(bodyResp)
 			out <- v
 		}
 		close(out)
-		err = <-errCh
 		close(errCh)
 		done <- true
-	}(err)
+	}()
 
 	select {
 	case <-done:
-		return out, err
-	case err := <-errCh:
-		if err != nil {
-			return out, err
-		}
 		return out, nil
-	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+	case err := <-errCh:
 		return out, err
+	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+		return out, nil
 	}
 }
 
@@ -149,7 +137,7 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 			payload, err := json.Marshal(v.TransactionID)
 			if err != nil {
 				errOut <- err
-				break
+				continue
 			}
 
 			resp, err := p.HttpClient.Post(
@@ -159,15 +147,10 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 			)
 			if err != nil {
 				errOut <- err
-				break
+				continue
 			}
 
-			bodyResp, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				errOut <- err
-				break
-			}
-
+			bodyResp, _ := ioutil.ReadAll(resp.Body)
 			v.Enrichment.Category = string(bodyResp)
 			out <- v
 		}
