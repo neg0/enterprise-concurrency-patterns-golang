@@ -73,8 +73,10 @@ func (p *Pipeline) generatePipelines(transactions []Bank.Transaction) <-chan Ban
 func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
 	out := make(chan Bank.Transaction, len(in))
 	errCh := make(chan error, 1)
+	done := make(chan bool)
 	var err error
 
+	p.Add(1)
 	go func(hasError error) {
 		for v := range in {
 			payload, _ := json.Marshal(v.TransactionID)
@@ -85,7 +87,7 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 			)
 			if err != nil {
 				errCh <- err
-				break
+				continue
 			}
 			bodyResp, _ := ioutil.ReadAll(resp.Body)
 
@@ -95,10 +97,15 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		close(out)
 		err = <-errCh
 		close(errCh)
+		done<- true
 	}(err)
-	time.Sleep(time.Millisecond * 1)
 
-	return out, err
+	select {
+		case <-done:
+			return out, err
+		case <-time.After(time.Millisecond * 1):
+			return out, err
+	}
 }
 
 func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Transaction, error) {
