@@ -5,6 +5,7 @@ import (
 	Bank "concurrency-patterns-go/pipeline/bank_transaction"
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -12,6 +13,23 @@ import (
 type Pipeline struct {
 	sync.WaitGroup
 	HttpClient
+}
+
+var once sync.Once
+var instance *Pipeline
+var DefaultTimeOutInSecond = 1
+
+func init() {
+	once.Do(func() {
+		instance = &Pipeline{}
+		instance.HttpClient = &http.Client{
+			Timeout: time.Duration(int64(DefaultTimeOutInSecond)),
+		}
+	})
+}
+
+func Instance() *Pipeline {
+	return instance
 }
 
 func (p *Pipeline) Enrich(transactions []byte) ([]Bank.Transaction, error) {
@@ -110,7 +128,7 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 	select {
 		case <-done:
 			return out, err
-		case <-time.After(time.Millisecond * 1):
+		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
 			return out, err
 	}
 }
@@ -160,7 +178,7 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 	select {
 		case <-done:
 			return out, err
-		case <-time.After(time.Millisecond * 1):
+		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
 			return out, err
 	}
 }
