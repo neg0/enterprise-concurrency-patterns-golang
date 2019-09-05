@@ -122,14 +122,14 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		close(out)
 		err = <-errCh
 		close(errCh)
-		done<- true
+		done <- true
 	}(err)
 
 	select {
-		case <-done:
-			return out, err
-		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
-			return out, err
+	case <-done:
+		return out, err
+	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+		return out, err
 	}
 }
 
@@ -171,15 +171,15 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 		close(out)
 		err = <-errOut
 		close(errOut)
-		done<- true
+		done <- true
 	}(err)
 	time.Sleep(time.Millisecond * 1)
 
 	select {
-		case <-done:
-			return out, err
-		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
-			return out, err
+	case <-done:
+		return out, err
+	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+		return out, err
 	}
 }
 
