@@ -4,7 +4,6 @@ import (
 	"concurrency-patterns-go/pipeline"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"testing"
 )
 
@@ -15,8 +14,7 @@ func TestPipeline(t *testing.T) {
 		t.Fail()
 	}
 
-	sut := &pipeline.Pipeline{}
-	sut.HttpClient = &http.Client{}
+	sut := pipeline.Instance()
 
 	actual, err := sut.Enrich(testCases)
 

@@ -17,13 +17,13 @@ type Pipeline struct {
 
 var once sync.Once
 var instance *Pipeline
-var DefaultTimeOutInSecond = 1
+var DefaultTimeOutInSecond = 3
 
 func init() {
 	once.Do(func() {
 		instance = &Pipeline{}
 		instance.HttpClient = &http.Client{
-			Timeout: time.Duration(int64(DefaultTimeOutInSecond)),
+			Timeout: time.Duration(DefaultTimeOutInSecond) * time.Second,
 		}
 	})
 }
@@ -124,15 +124,15 @@ func (p *Pipeline) identifyMerchant(in <-chan Bank.Transaction) (<-chan Bank.Tra
 	}(err)
 
 	select {
-		case <-done:
+	case <-done:
+		return out, err
+	case err := <-errCh:
+		if err != nil {
 			return out, err
-		case err := <-errCh:
-			if err != nil {
-				return out, err
-			}
-			return out, nil
-		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
-			return out, err
+		}
+		return out, nil
+	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+		return out, err
 	}
 }
 
@@ -178,10 +178,10 @@ func (p *Pipeline) identifyCategory(in <-chan Bank.Transaction) (<-chan Bank.Tra
 	}(err)
 
 	select {
-		case <-done:
-			return out, err
-		case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
-			return out, err
+	case <-done:
+		return out, err
+	case <-time.After(time.Millisecond * time.Duration(int64(DefaultTimeOutInSecond))):
+		return out, err
 	}
 }
 
