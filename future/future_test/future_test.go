@@ -2,60 +2,74 @@ package future_test
 
 import (
 	Future "concurrency-patterns-go/future"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
 )
 
 func TestFuture(t *testing.T) {
-	sut := &Future.Promise{}
+	sut := Future.NewPromise()
 
 	t.Run("when_closure_used_as_parameter_with_success", func(t *testing.T) {
 		sut.
-			Future(setContext("http://golang_test_server:8091")).
+			Promise(setContext("http://golang_test_server:8091")).
 			Catch(func(e error) {
 				t.Log(e.Error())
 				t.Fail()
 			}).
-			Then(func(s string) {
-				if len(s) < 1 {
+			Then(func(b []byte) {
+				if len(b) < 1 {
 					t.Fail()
 				}
 			}).
-			Execute()
+			Await()
 	})
 
 	t.Run("when_closure_used_as_parameter_with_error", func(t *testing.T) {
 		sut.
-			Future(setContext("http://golang_test_server:666")).
+			Promise(setContext("http://golang_test_server:666")).
 			Catch(func(e error) {
 				if e == nil {
 					t.Fail()
 				}
 			}).
-			Then(func(s string) {
-				if len(s) > 0 {
-					t.Log(s)
+			Then(func(b []byte) {
+				if len(b) > 0 {
+					t.Log(b)
 					t.Fail()
 				}
 			}).
-			Execute()
+			Await()
 	})
 }
 
-func setContext(url string) func() (string, error) {
-	return func() (string, error) {
+func setContext(url string) func() ([]byte, error) {
+	return func() ([]byte, error) {
 		httpClient := &http.Client{}
 		resp, err := httpClient.Get(url)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		bodyResp, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
-		return string(bodyResp), nil
+		httpStatusCode := resp.StatusCode
+		if httpStatusCode > 299 || httpStatusCode < 200 {
+			errMsg := fmt.Sprintf(
+				"status code %d %s is returned. %s",
+				httpStatusCode,
+				http.StatusText(httpStatusCode),
+				string(bodyResp),
+			)
+
+			return nil, errors.New(errMsg)
+		}
+
+		return bodyResp, nil
 	}
 }

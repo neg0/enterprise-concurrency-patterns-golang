@@ -2,40 +2,51 @@ package future
 
 import "sync"
 
-type resolve func(string)
-type reject func(error)
-type execution func() (string, error)
+type resolve func([]byte) Promise
+type reject func(error) Promise
+type execution func() ([]byte, error)
 
-type Promise struct {
+type Promise interface {
+	Promise(f execution) Promise
+	Then(f resolve) Promise
+	Catch(f reject) Promise
+	Await()
+}
+
+type promise struct {
 	resolve
 	reject
 	sync.WaitGroup
 }
 
-func (p *Promise) Then(f resolve) *Promise {
+func NewPromise() Promise {
+	return &promise{}
+}
+
+func (p *promise) Then(f resolve) Promise {
 	p.resolve = f
 
 	return p
 }
 
-func (p *Promise) Catch(f reject) *Promise {
+func (p *promise) Catch(f reject) Promise {
 	p.reject = f
 
 	return p
 }
 
-func (p *Promise) Execute() {
+func (p *promise) Await() {
 	p.Wait()
 }
 
-func (p *Promise) Future(f execution) *Promise {
+func (p *promise) Promise(f execution) Promise {
 	p.Add(1)
-	go func(p *Promise) {
-		str, err := f()
+	go func(p *promise) {
+		bytes, err := f()
 		if err != nil {
 			p.reject(err)
 		} else {
-			p.resolve(str)
+			p.resolve(bytes)
 		}
 		p.Done()
 	}(p)

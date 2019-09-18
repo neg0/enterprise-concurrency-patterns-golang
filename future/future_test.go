@@ -7,34 +7,51 @@ import (
 )
 
 func TestFuture(t *testing.T) {
-	sut := &Promise{}
+	sut := NewPromise()
 
 	t.Run("when_result_is_successful", func(t *testing.T) {
 		sut.
-			Future(func() (string, error) {
-				return "Golang Concurrency Ninja!", nil
-			}).Then(func(s string) {
-			if !strings.Contains(s, "Golang Concurrency Ninja!") {
+			Promise(func() ([]byte, error) {
+				return []byte("Golang2 Concurrency Ninja!"), nil
+			}).
+			Then(func(b []byte) Promise {
+				if !strings.Contains(string(b), "Golang2 Concurrency Ninja!") {
+					t.Fail()
+				}
+
+				return  NewPromise().Promise(func() ([]byte, error) {
+					return []byte("Golang Concurrency Ninja!"), nil
+				}).Then(func(b []byte) Promise {
+					if !strings.Contains(string(b), "Golang Concurrency Ninja!") {
+						t.Fail()
+					}
+					return sut
+				}).Catch(func(e error) Promise {
+					t.Fail()
+					return sut
+				})
+			}).
+			Catch(func(e error) Promise {
 				t.Fail()
-			}
-		}).Catch(func(e error) {
-			t.Fail()
-		}).
-			Execute()
+				return sut
+			}).
+			Await()
 	})
 
 	t.Run("when_result_is_failed", func(t *testing.T) {
 		successCallsCounter := 0
 		sut.
-			Future(func() (string, error) {
-				return "", errors.New("error occurred")
-			}).Then(func(s string) {
+			Promise(func() ([]byte, error) {
+				return nil, errors.New("error occurred")
+			}).Then(func(b []byte) Promise {
 			successCallsCounter++
-		}).Catch(func(e error) {
+			return sut
+		}).Catch(func(e error) Promise {
 			if strings.Compare(e.Error(), "error occurred") == -1 {
 				t.Fail()
 			}
-		}).Execute()
+			return sut
+		}).Await()
 
 		if successCallsCounter > 0 {
 			t.Fail()
